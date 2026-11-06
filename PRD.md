@@ -139,6 +139,14 @@ Relasi (asal -> tujuan; include = selalu dipanggil, extend = kondisional):
 **Monitoring Transaksi:** kartu ringkasan, tab status (Semua, Menunggu Pembayaran, Lunas, Gagal, Kedaluwarsa), pencarian dan filter, tabel, panel detail dengan linimasa transaksi dan Salin ID.
 **Halaman kelola:** Kelola Siswa (tambah, ubah, nonaktifkan, tanpa hapus); Kelola Program (ubah, nonaktifkan); Kelola Materi dan Bank Soal (tambah dan ubah, **Form Tambah Soal** dengan subtes dan tingkat kesulitan, tandai gratis/berbayar, soal terpakai hanya dinonaktifkan); Kelola Tryout (pilih soal dari bank soal, atur tanggal rilis, status Draft/Rilis).
 
+**Susunan Materi dan Bank Soal Admin:** halaman awal menampilkan tujuh kartu subtes dalam kelompok TPS dan Literasi & Penalaran Matematika. Setiap kartu memuat jumlah soal, jumlah materi, jumlah soal aktif/nonaktif, serta tombol Kelola Subtes. Pencarian di halaman awal mencari soal dan materi lintas subtes.
+- Detail subtes memiliki breadcrumb, navigasi kembali/pindah subtes, serta tab **Bank Soal** dan **Materi** dengan jumlah konten masing-masing.
+- Bank Soal hanya menampilkan soal subtes yang dibuka, dengan pencarian pertanyaan/kode soal dan filter kesulitan, akses, serta status. Klik pertanyaan membuka pratinjau lengkap (pilihan A–E, kunci, gambar opsional, pembahasan) dan tombol Ubah Soal.
+- Materi hanya menampilkan PDF/video subtes yang dibuka, dengan pencarian judul/kode materi serta filter tipe dan akses. Materi diurutkan sesuai kolom `urutan`.
+- Daftar memakai pagination 10 item; filter dan halaman disimpan terpisah per subtes dan tab selama sesi halaman, termasuk setelah mengedit. Pada layar HP, baris tabel ditampilkan sebagai kartu.
+- Form Tambah Soal/Materi otomatis memilih subtes yang sedang dibuka. Form Ubah mengikuti subtes data yang diedit. Status aktif dan akses konten dapat diubah melalui menu Lainnya pada setiap baris.
+- Pengelompokan menggunakan kolom `subtes` pada tabel `soal` dan `materi`; tidak menambah tabel atau mengubah aturan akses siswa.
+
 ## 10. Kebutuhan Nonfungsional
 Responsif (HP dan komputer), halaman di bawah 3 detik, password di-hash, data kartu tidak disimpan, validasi signature pembayaran, konten berbayar tidak bisa dibuka lewat tautan langsung tanpa cek akses, jawaban tryout tersimpan otomatis, backup berkala.
 

@@ -1,0 +1,77 @@
+{
+  "date": "2026-11-06",
+  "core_tests": {
+    "passed": 13,
+    "total": 13
+  },
+  "browser_tests": {
+    "checks": [
+      {
+        "name": "Public, student and admin routes at 1280px",
+        "pass": true
+      },
+      {
+        "name": "Public, student and admin routes at 390px",
+        "pass": true
+      },
+      {
+        "name": "Registration, free practice, reload, checkout, payment and upgrade",
+        "pass": true
+      },
+      {
+        "name": "Tryout autosave, resume, doubt flag, review and one-attempt restriction",
+        "pass": true
+      },
+      {
+        "name": "Actual PDF download and admin CSV export with read-only payment details",
+        "pass": true
+      },
+      {
+        "name": "Admin editing persists and preserves data history",
+        "pass": true
+      },
+      {
+        "name": "Drilling resumes at the next unanswered question and historical review adds no attempt",
+        "pass": true
+      },
+      {
+        "name": "Account recovery, profile edits and password change",
+        "pass": true
+      },
+      {
+        "name": "Admin creates question, material, student and scheduled tryout from the bank",
+        "pass": true
+      },
+      {
+        "name": "Admin subtest catalog, filters, previews and contextual forms",
+        "pass": true
+      },
+      {
+        "name": "Admin pagination survives editing, tab changes and filters in other subtests",
+        "pass": true
+      },
+      {
+        "name": "Admin mobile catalog and complete question preview fit the screen",
+        "pass": true
+      },
+      {
+        "name": "Mobile menu, notifications, skip link and automatic expiry refresh",
+        "pass": true
+      },
+      {
+        "name": "No unhandled browser errors",
+        "pass": true
+      }
+    ],
+    "errors": []
+  },
+  "mobile_after_final_css": {
+    "checks": [
+      {
+        "name": "Admin mobile catalog and complete question preview fit the screen",
+        "pass": true
+      }
+    ],
+    "errors": []
+  }
+}

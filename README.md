@@ -32,6 +32,8 @@ Raka mempunyai contoh pesanan menunggu pembayaran. Buka **Pembayaran & Transaksi
 4. Buka bank soal, drilling, PDF, tryout, hasil, dan progress. Video membutuhkan Program Lengkap.
 5. Gunakan akun admin untuk mengelola siswa, program, materi, soal, jadwal tryout, serta mengekspor transaksi.
 
+Pada **Materi dan Bank Soal**, pilih salah satu dari tujuh kartu subtes, kemudian buka tab **Bank Soal** atau **Materi**. Klik pertanyaan untuk pratinjau soal lengkap; gunakan **Ubah** untuk mengedit dan **Lainnya** untuk mengatur status/akses. Form tambah mengikuti subtes yang sedang dibuka. Pencarian lintas subtes tersedia di halaman awal; pencarian dan filter pada detail hanya berlaku untuk subtes/tab tersebut.
+
 ## Susunan file
 
 | File | Isi |
@@ -71,4 +73,6 @@ node tests/browser.cjs
 
 Jika Playwright dipasang di lokasi lain, tentukan `PLAYWRIGHT_MODULE`. Gunakan `PLAYWRIGHT_BROWSERS_PATH` untuk lokasi browser dan `QA_OUTPUT` untuk folder hasil. Pengujian membuat server localhost sementara dan memakai profil browser terisolasi. Data browser pribadi tidak diubah. Video contoh dibuat ulang hanya jika file lokalnya belum ada.
 
-Hasil pemeriksaan terakhir ada di [AUDIT-PRD.md](AUDIT-PRD.md) dan [laporan browser](docs/hasil-uji-browser.json).
+Jika memakai executable Chromium yang sudah tersedia, tentukan `PLAYWRIGHT_EXECUTABLE_PATH`. Pengujian admin mencakup katalog per subtes, filter, pratinjau, form tambah sesuai subtes, serta mempertahankan pagination setelah edit dan perpindahan tab.
+
+Pemeriksaan terbaru untuk pengelompokan konten admin ada di [audit admin per subtes](docs/AUDIT-ADMIN-SUBTES.md) dan [hasil uji](docs/hasil-uji-admin-subtes.json). Audit prototype sebelumnya tersedia di [AUDIT-PRD.md](AUDIT-PRD.md) dan [laporan browser awal](docs/hasil-uji-browser.json).

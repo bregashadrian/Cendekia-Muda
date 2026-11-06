@@ -17,7 +17,7 @@ const server = http.createServer((req, res) => {
 });
 const checks = [], errors = [];
 let browser, base;
-async function check(name, fn) { try { await fn(); checks.push({ name, pass: true }); console.log('PASS', name); } catch (e) { checks.push({ name, pass: false, error: e.message }); console.error('FAIL', name, e.message); } }
+async function check(name, fn) { if (process.env.QA_CHECK && !name.includes(process.env.QA_CHECK)) return; try { await fn(); checks.push({ name, pass: true }); console.log('PASS', name); } catch (e) { checks.push({ name, pass: false, error: e.message }); console.error('FAIL', name, e.stack); } }
 async function newPage(width = 1280, height = 900) { const page = await browser.newPage({ viewport: { width, height }, reducedMotion: 'reduce' }); page.on('pageerror', error => errors.push(error.message)); return page; }
 async function route(page, url) { await page.goto(base + '/#' + url); await page.locator('h1').first().waitFor(); await page.waitForTimeout(80); assert.equal(await page.getByText('Halaman Belum Dapat Dibuka', { exact: true }).count(), 0); }
 async function login(page, name) { await route(page, name === 'admin' ? '/auth/admin-login' : '/auth/login'); await page.locator('[name=email]').fill(name + '@cendekiamuda.test'); await page.locator('[name=password]').fill('demo1234'); await page.locator('form [type=submit]').click(); await page.waitForURL(name === 'admin' ? '**/#/admin/dashboard' : '**/#/siswa/beranda'); }
@@ -60,7 +60,7 @@ async function demoVideos() {
 
 (async () => {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve)); base = 'http://127.0.0.1:' + server.address().port;
-  browser = await chromium.launch({ headless: true });
+  browser = await chromium.launch({ headless: true, ...(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {}) });
   await demoVideos();
   if (process.env.QA_CAPTURE_REFERENCES) {
     for (const [name, file] of [['landing', 'Landing Page Cendekia Muda.svg'], ['dashboard', 'Dashboard Siswa Cendekia Muda (Status Aktif).svg'], ['login', 'Halaman Login Cendekia Muda.svg']]) {
@@ -76,7 +76,7 @@ async function demoVideos() {
       await login(page, 'nadia');
       for (const url of ['beranda', 'bank-soal', 'subtes/pu', 'materi-preview', 'video', 'program', 'transaksi', 'tryout', 'tryout/to-003', 'tryout/hasil/hasil-001', 'tryout/review/hasil-001', 'nilai-progress', 'notifikasi', 'profil', 'materi/mat-pu-intro', 'materi/mat-pu-video']) { await route(page, '/siswa/' + url); await layout(page, 'aktif-' + url); if (['beranda', 'bank-soal', 'nilai-progress', 'program'].includes(url)) await shot(page, `${width}-${url.replaceAll('/', '-')}`); }
       await login(page, 'admin');
-      for (const url of ['dashboard', 'siswa', 'program', 'materi-soal', 'tryout', 'akses-konten', 'transaksi']) { await route(page, '/admin/' + url); await layout(page, 'admin-' + url); if (url === 'dashboard') await shot(page, `${width}-admin`); }
+      for (const url of ['dashboard', 'siswa', 'program', 'materi-soal', 'materi-soal/pu/soal', 'materi-soal/lbe/materi', 'tryout', 'akses-konten', 'transaksi']) { await route(page, '/admin/' + url); await layout(page, 'admin-' + url); if (['dashboard', 'materi-soal', 'materi-soal/pu/soal', 'materi-soal/lbe/materi'].includes(url)) await shot(page, `${width}-admin-${url.replaceAll('/', '-')}`); }
       await page.close();
     });
   }
@@ -118,12 +118,151 @@ async function demoVideos() {
     await page.locator('[data-act=profile-tab][data-value=password]').click(); await page.locator('[name=current_password]').fill('pemulihan123'); await page.locator('[name=new_password]').fill('passwordbaru123'); await page.locator('[name=confirm_password]').fill('passwordbaru123'); await page.locator('form [type=submit]').click(); await page.locator('.success-message').waitFor(); assert.equal(await page.evaluate(() => CM.verifyPassword('passwordbaru123', CM.user().password)), true); await page.close();
   });
   await check('Admin creates question, material, student and scheduled tryout from the bank', async () => {
-    const page = await newPage(); await login(page, 'admin'); await route(page, '/admin/materi-soal'); await page.locator('[data-act=editor][data-type=question]').first().click();
+    const page = await newPage(); await login(page, 'admin'); await route(page, '/admin/materi-soal/pu/soal'); await page.locator('[data-act=editor][data-type=question]').first().click();
     for (const [name, value] of Object.entries({ question: 'Soal tambahan pengujian: 2 + 3 = ...', option_a: '5', option_b: '6', option_c: '7', option_d: '8', option_e: '9', explanation: 'Dua ditambah tiga sama dengan lima.' })) await page.locator(`.dialog [name=${name}]`).fill(value);
     await page.locator('.dialog [type=submit]').click(); await page.locator('.dialog').waitFor({ state: 'detached' }); assert.equal(await page.evaluate(() => CM.db.soal.length), 71);
-    await page.locator('[data-act=editor][data-type=material]').first().click(); await page.locator('.dialog [name=title]').fill('Materi Tambahan'); await page.locator('.dialog [name=url]').fill('assets/video/pu.webm'); await page.locator('.dialog [name=type]').selectOption('video'); await page.locator('.dialog [type=submit]').click(); await page.locator('.dialog').waitFor({ state: 'detached' }); assert.equal(await page.evaluate(() => CM.db.materi.length), 22);
+    await page.locator('.admin-content-tabs a[href$="/materi"]').click(); await page.locator('[data-act=editor][data-type=material]').first().click(); await page.locator('.dialog [name=title]').fill('Materi Tambahan'); await page.locator('.dialog [name=url]').fill('assets/video/pu.webm'); await page.locator('.dialog [name=type]').selectOption('video'); await page.locator('.dialog [type=submit]').click(); await page.locator('.dialog').waitFor({ state: 'detached' }); assert.equal(await page.evaluate(() => CM.db.materi.length), 22);
     await route(page, '/admin/siswa'); await page.locator('[data-act=editor][data-type=student]').first().click(); for (const [name, value] of Object.entries({ name: 'Siswa Admin Uji', email: 'admin-created@example.test', phone: '081234567890', password: 'belajar123' })) await page.locator(`.dialog [name=${name}]`).fill(value); await page.locator('.dialog [type=submit]').click(); await page.locator('.dialog').waitFor({ state: 'detached' }); assert.equal(await page.evaluate(() => CM.db.users.length), 4);
     await route(page, '/admin/tryout'); await page.locator('[data-act=editor][data-type=tryout]').first().click(); await page.locator('.dialog [name=title]').fill('Tryout Terjadwal Uji'); await page.locator('.dialog [name=release]').fill('2099-01-10T08:00'); await page.locator('.question-picker summary').first().click(); await page.locator('.dialog [name=questions]').first().check(); await page.locator('.dialog [type=submit]').click(); await page.locator('.dialog').waitFor({ state: 'detached' }); const row = page.locator('tr', { hasText: 'Tryout Terjadwal Uji' }); await row.locator('[data-act=toggle]').click(); assert.equal(await page.evaluate(() => CM.db.tryout.at(-1).status), 'Rilis'); const id = await page.evaluate(() => CM.db.tryout.at(-1).id_tryout); await login(page, 'nadia'); await route(page, '/siswa/tryout/' + id); assert.ok(page.url().endsWith('/siswa/tryout')); await page.close();
+  });
+  await check('Admin subtest catalog, filters, previews and contextual forms', async () => {
+    const page = await newPage(); await login(page, 'admin'); await route(page, '/admin/materi-soal');
+    assert.equal(await page.locator('.admin-subject-card').count(), 7);
+    assert.equal(await page.locator('.admin-subject-group').count(), 2);
+    for (const subject of await page.evaluate(() => CM.subtests)) {
+      const card = page.locator(`[data-subject="${subject.id}"]`);
+      assert.equal(await card.locator('.admin-subject-counts strong').allTextContents().then(v => v.join(',')), '10,3');
+    }
+    await page.getByRole('link', { name: 'Kelola Literasi Bahasa Inggris', exact: true }).click();
+    await page.waitForURL('**/#/admin/materi-soal/lbe/soal');
+    await page.locator('.admin-content-tabs a[aria-current=page][href="#/admin/materi-soal/lbe/soal"]').waitFor();
+    assert.equal(await page.locator('[data-question-id]').count(), 10);
+    assert.ok((await page.locator('[data-question-id]').evaluateAll(rows => rows.map(row => row.dataset.questionId))).every(id => id.startsWith('q-lbe-')));
+    assert.ok(await page.locator('.sidebar a[href="#/admin/materi-soal"]').getAttribute('aria-current'));
+    await page.getByRole('button', { name: 'Tambah Soal', exact: true }).click();
+    assert.equal(await page.locator('.dialog [name=subject]').inputValue(), 'Literasi Bahasa Inggris');
+    await page.getByRole('button', { name: 'Batal', exact: true }).click();
+    await page.locator('[data-filter=kesulitan]').selectOption('Sulit');
+    assert.equal(await page.locator('[data-question-id]').count(), 3);
+    await page.locator('[data-filter=akses]').selectOption('gratis');
+    assert.equal(await page.locator('[data-question-id]').count(), 0);
+    await page.getByRole('button', { name: 'Reset filter', exact: true }).click();
+    await page.locator('[data-filter=status]').selectOption('aktif');
+    await page.locator('[data-act=question-preview]').first().click();
+    assert.equal(await page.locator('.admin-preview-options li').count(), 5);
+    assert.equal(await page.locator('.admin-preview-options li.correct').count(), 1);
+    assert.ok(await page.locator('.admin-preview-explanation').textContent());
+    await page.getByRole('button', { name: 'Ubah Soal', exact: true }).click();
+    assert.equal(await page.locator('.dialog [name=subject]').inputValue(), 'Literasi Bahasa Inggris');
+    const updated = 'Urban trees: pertanyaan yang diperbarui melalui pratinjau.';
+    await page.locator('.dialog [name=question]').fill(updated);
+    await page.locator('.dialog [type=submit]').click(); await page.locator('.dialog').waitFor({ state: 'detached' });
+    assert.equal(await page.locator('[data-filter=status]').inputValue(), 'aktif');
+    assert.equal(await page.locator('[data-question-id=q-lbe-1] .question-excerpt').textContent(), updated);
+    await page.locator('[data-question-id=q-lbe-1] summary').click();
+    await page.locator('[data-question-id=q-lbe-1] [data-type=question-access]').click();
+    assert.equal(await page.locator('[data-question-id=q-lbe-1] [data-label=Akses]').textContent(), 'Berbayar');
+    await page.locator('.admin-content-tabs a[href$="/materi"]').click();
+    await page.locator('[data-material-id]').first().waitFor();
+    assert.equal(await page.locator('[data-material-id]').count(), 3);
+    await page.getByRole('button', { name: 'Tambah Materi', exact: true }).click();
+    assert.equal(await page.locator('.dialog [name=subject]').inputValue(), 'Literasi Bahasa Inggris');
+    await page.getByRole('button', { name: 'Batal', exact: true }).click();
+    await page.locator('[data-filter=tipe]').selectOption('video');
+    assert.equal(await page.locator('[data-material-id]').count(), 1);
+    await page.locator('.admin-content-tabs a[href$="/soal"]').click();
+    await page.locator('[data-filter=status]').waitFor();
+    assert.equal(await page.locator('[data-filter=status]').inputValue(), 'aktif');
+    await page.locator('[data-admin-subject]').selectOption('pu');
+    await page.waitForURL('**/#/admin/materi-soal/pu/soal');
+    await page.locator('.admin-content-tabs a[aria-current=page][href="#/admin/materi-soal/pu/soal"]').waitFor();
+    assert.equal(await page.locator('[data-filter=status]').inputValue(), '');
+    await page.getByRole('link', { name: 'Semua Subtes', exact: true }).click();
+    await page.locator('.admin-catalog-search input').waitFor();
+    await page.locator('[data-filter=search]').fill('Urban trees');
+    assert.equal(await page.locator('[data-question-id]').count(), 1);
+    assert.equal(await page.locator('[data-question-id]').getAttribute('data-question-id'), 'q-lbe-1');
+    // Search by an actual title, independent of seed wording.
+    const title = await page.evaluate(() => CM.db.materi.find(m => m.subtes === 'Literasi Bahasa Inggris' && m.tipe === 'video').judul);
+    await page.locator('[data-filter=search]').fill(title);
+    assert.equal(await page.locator('[data-material-id]').count(), 1);
+    await page.locator('[data-filter=search]').fill('<script>missing</script>');
+    assert.equal(await page.locator('[data-question-id], [data-material-id]').count(), 0);
+    assert.ok((await page.locator('.admin-search-summary').textContent()).includes('<script>missing</script>'));
+    await route(page, '/admin/materi-soal/lbe/soal');
+    await page.getByRole('button', { name: 'Tambah Soal', exact: true }).click();
+    for (const [name, value] of Object.entries({ question: 'QA konteks LBE <b>teks biasa</b>', option_a: 'A', option_b: 'B', option_c: 'C', option_d: 'D', option_e: 'E', explanation: 'Pembahasan LBE.' })) await page.locator(`.dialog [name=${name}]`).fill(value);
+    await page.locator('.dialog [type=submit]').click(); await page.locator('.dialog').waitFor({ state: 'detached' });
+    assert.equal(await page.evaluate(() => CM.db.soal.at(-1).subtes), 'Literasi Bahasa Inggris');
+    await page.locator('[data-filter=search]').fill('QA konteks LBE');
+    assert.equal(await page.locator('.admin-question-link b').count(), 0);
+    await page.locator('[data-question-id] summary').click();
+    await page.getByRole('button', { name: 'Nonaktifkan', exact: true }).click();
+    assert.equal(await page.locator('[data-question-id]').count(), 0); // Active filter is retained.
+    await page.locator('[data-filter=status]').selectOption('nonaktif');
+    assert.equal(await page.locator('[data-question-id]').count(), 1);
+    assert.equal(await page.evaluate(() => CM.db.soal.at(-1).is_aktif), false);
+    await page.locator('.admin-content-tabs a[href$="/materi"]').click();
+    await page.getByRole('button', { name: 'Tambah Materi', exact: true }).click();
+    await page.locator('.dialog [name=title]').fill('Materi QA LBE');
+    await page.locator('.dialog [name=url]').fill('assets/video/lbe.webm');
+    await page.locator('.dialog [name=type]').selectOption('video');
+    await page.locator('.dialog [type=submit]').click(); await page.locator('.dialog').waitFor({ state: 'detached' });
+    assert.equal(await page.evaluate(() => CM.db.materi.at(-1).subtes), 'Literasi Bahasa Inggris');
+    await route(page, '/admin/materi-soal/tidak-ada/soal');
+    assert.equal(await page.locator('h1').textContent(), 'Subtes Tidak Ditemukan');
+    await login(page, 'raka'); await route(page, '/admin/materi-soal/lbe/soal');
+    assert.ok(page.url().endsWith('/auth/admin-login'));
+    await page.close();
+  });
+  await check('Admin pagination survives editing, tab changes and filters in other subtests', async () => {
+    const page = await newPage(); await login(page, 'admin');
+    await page.evaluate(() => {
+      const sample = CM.db.soal.find(q => q.id_soal === 'q-pu-1');
+      for (let i = 0; i < 95; i++) CM.db.soal.push({ ...sample, id_soal: `qa-pu-${i}`, pertanyaan: `Pertanyaan tambahan ${i}` });
+      CM.save();
+    });
+    await route(page, '/admin/materi-soal/pu/soal');
+    assert.ok(await page.locator('.page-number').count() <= 5);
+    await page.getByRole('button', { name: 'Halaman 2', exact: true }).click();
+    const row = page.locator('[data-question-id]').first(), id = await row.getAttribute('data-question-id');
+    await row.getByRole('button', { name: 'Ubah', exact: true }).click();
+    await page.locator('.dialog [name=question]').fill('Soal halaman kedua setelah diubah.');
+    await page.locator('.dialog [type=submit]').click(); await page.locator('.dialog').waitFor({ state: 'detached' });
+    assert.equal(await page.locator('.pagination [aria-current=page]').textContent(), '2');
+    assert.equal(await page.locator('[data-question-id]').first().getAttribute('data-question-id'), id);
+    await page.locator('.admin-content-tabs a[href$="/materi"]').click();
+    await page.locator('[data-filter=tipe]').selectOption('video');
+    await page.locator('.admin-content-tabs a[href$="/soal"]').click();
+    await page.locator('[data-question-id]').first().waitFor();
+    assert.equal(await page.locator('.pagination [aria-current=page]').textContent(), '2');
+    await page.locator('[data-admin-subject]').selectOption('ppu');
+    await page.waitForURL('**/#/admin/materi-soal/ppu/soal');
+    await page.locator('.admin-content-tabs a[aria-current=page][href="#/admin/materi-soal/ppu/soal"]').waitFor();
+    await page.locator('[data-filter=kesulitan]').selectOption('Mudah');
+    await page.locator('[data-admin-subject]').selectOption('pu');
+    await page.waitForURL('**/#/admin/materi-soal/pu/soal');
+    await page.locator('.admin-content-tabs a[aria-current=page][href="#/admin/materi-soal/pu/soal"]').waitFor();
+    assert.equal(await page.locator('.pagination [aria-current=page]').textContent(), '2');
+    await page.locator('.admin-content-tabs a[href$="/materi"]').click();
+    await page.locator('[data-filter=tipe]').waitFor();
+    assert.equal(await page.locator('[data-filter=tipe]').inputValue(), 'video');
+    await page.reload(); await page.locator('[data-material-id]').first().waitFor();
+    assert.ok(page.url().endsWith('/admin/materi-soal/pu/materi'));
+    await page.close();
+  });
+  await check('Admin mobile catalog and complete question preview fit the screen', async () => {
+    const page = await newPage(390); await login(page, 'admin'); await route(page, '/admin/materi-soal');
+    await page.getByRole('link', { name: 'Kelola Penalaran Umum', exact: true }).click();
+    await page.locator('[data-question-id]').first().waitFor(); await layout(page, 'mobile-admin-subtest');
+    await page.screenshot({ path: path.join(out, '390-admin-bank-soal.png'), fullPage: false });
+    await page.locator('[data-act=question-preview]').first().click();
+    await page.locator('.admin-question-preview').waitFor(); await layout(page, 'mobile-admin-preview');
+    assert.ok(await page.locator('.dialog').evaluate(el => el.scrollWidth <= el.clientWidth + 1));
+    await page.screenshot({ path: path.join(out, '390-admin-question-preview.png'), fullPage: false }); await page.keyboard.press('Escape');
+    await page.locator('.dialog').waitFor({ state: 'detached' });
+    assert.equal(await page.evaluate(() => document.activeElement.dataset.act), 'question-preview');
+    await page.close();
   });
   await check('Mobile menu, notifications, skip link and automatic expiry refresh', async () => {
     const page = await newPage(390); await login(page, 'nadia'); await page.locator('[data-act=menu]').click(); await page.locator('.sidebar a[href="#/siswa/notifikasi"]').click(); await page.locator('[data-act=read-all]').click(); assert.equal(await page.evaluate(() => CM.db.notifikasi.filter(n => n.id_user === CM.user().id_user && !n.sudah_dibaca).length), 0);
