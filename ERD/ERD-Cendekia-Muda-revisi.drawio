@@ -28,7 +28,7 @@
         <mxCell id="users_6" parent="users" style="text;strokeColor=none;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=6;fontSize=11;whiteSpace=wrap;html=1;" value="      tahun_lulus" vertex="1">
           <mxGeometry height="22" width="240" y="160" as="geometry" />
         </mxCell>
-        <mxCell id="users_7" parent="users" style="text;strokeColor=none;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=6;fontSize=11;whiteSpace=wrap;html=1;" value="      role" vertex="1">
+        <mxCell id="users_7" parent="users" style="text;strokeColor=none;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=6;fontSize=11;whiteSpace=wrap;html=1;" value="      role (siswa/admin)" vertex="1">
           <mxGeometry height="22" width="240" y="182" as="geometry" />
         </mxCell>
         <mxCell id="users_8" parent="users" style="text;strokeColor=none;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=6;fontSize=11;whiteSpace=wrap;html=1;" value="      is_aktif" vertex="1">
@@ -352,9 +352,6 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="e11" edge="1" parent="1" source="soal" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERmany;endFill=0;strokeColor=#666666;exitX=0;exitY=0.225;entryX=1;entryY=0.5;" target="jawaban_latihan">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="YlizQbY1uMw_ZbYHQZ9j-1" edge="1" parent="1" source="soal_13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="materi">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>

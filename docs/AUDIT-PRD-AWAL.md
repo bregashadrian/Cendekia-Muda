@@ -2,6 +2,8 @@
 
 Tanggal: 3 November 2026. Acuan utama: `PRD.md` dalam workspace ini.
 
+**Arsip:** jumlah 32 use case dan temuan di bawah mengacu pada kondisi 3 November 2026. Dokumentasi aktor saat ini memuat 33 use case; lihat [Aktor dan Akses](AKTOR-DAN-AKSES.md). Hasil audit historis tidak diperbarui menjadi klaim tentang implementasi terbaru.
+
 **Kesimpulan: implementasi sudah memiliki fondasi prototype, tetapi belum memenuhi PRD secara menyeluruh. Ada bug pada alur inti, fitur wajib yang belum tersedia, dan fitur tambahan yang bertentangan dengan batasan PRD.**
 
 ## Cakupan dan cara pemeriksaan

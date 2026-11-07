@@ -2,6 +2,8 @@
 
 Tanggal pemeriksaan: **4 November 2026**. Acuan: [PRD final](PRD.md) dan folder `foto svg/`.
 
+**Catatan dokumentasi 7 November 2026:** PRD kini mencantumkan Pengunjung dan 33 use case. Penjelasan terbaru ada di [Aktor dan Akses](docs/AKTOR-DAN-AKSES.md); hasil uji di bawah tetap merupakan catatan pemeriksaan 4 November. Perubahan halaman admin 6 November dicatat di [audit admin per subtes](docs/AUDIT-ADMIN-SUBTES.md).
+
 Implementasi prototype sudah diperbarui dan alur utama yang diuji berjalan. Tampilan mengikuti warna, font Outfit, komponen, susunan halaman, serta aset gambar dari SVG. Isi yang bertentangan dengan PRD disesuaikan: tidak memakai kupon, ranking, IRT, mentor, transfer manual, atau klaim jumlah konten yang tidak ada.
 
 Audit sebelumnya, termasuk temuan dan nomor baris kode lama, disimpan di [arsip audit awal](docs/AUDIT-PRD-AWAL.md). Arsip tersebut bukan status implementasi sekarang.

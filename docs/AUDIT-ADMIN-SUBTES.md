@@ -2,6 +2,8 @@
 
 Tanggal: **6 November 2026**.
 
+**Pembaruan dokumentasi:** penjelasan Pengunjung, Siswa, Admin, dan Payment Gateway per 7 November 2026 ada di [Aktor dan Akses](AKTOR-DAN-AKSES.md). Hasil pengujian halaman admin pada dokumen ini tetap mengacu pada pemeriksaan 6 November.
+
 Menu `#/admin/materi-soal` sekarang menampilkan tujuh kartu subtes, dikelompokkan dalam TPS serta Literasi & Penalaran Matematika. Buka Kelola Subtes untuk berpindah ke tab Bank Soal atau Materi. Pengelompokan memakai data `subtes` yang sudah ada.
 
 - Pencarian lintas subtes di halaman awal; pencarian dan filter khusus pada detail subtes.
@@ -20,7 +22,7 @@ Menu `#/admin/materi-soal` sekarang menampilkan tujuh kartu subtes, dikelompokka
 - Layout diperiksa pada lebar 1280 dan 390 px. Setelah penyesuaian terakhir lebar dropdown HP, skenario mobile dijalankan kembali dan lulus.
 - Pemeriksaan sintaks JavaScript dan `git diff --check` lulus.
 
-[Hasil terstruktur](hasil-uji-admin-subtes.json). Pengujian memakai Chromium dengan profil terisolasi; data browser pribadi tidak diubah. Backend tetap berupa prototype lokal sesuai README.
+[Hasil terstruktur](hasil-uji-admin-subtes.json). Pengujian memakai Chromium dengan profil terisolasi; data browser pribadi tidak diubah. Aplikasi masih berupa prototype dengan penyimpanan browser, tanpa backend server, sesuai README.
 
 ## Screenshot
 

@@ -1,25 +1,35 @@
 # PRD: Cendekia Muda (Platform Persiapan UTBK-SNBT Online)
 
-Versi: terbaru, sinkron dengan laporan final (32 use case, 12 tabel).
+Versi: **7 November 2026** — dokumentasi Pengunjung, Siswa, Admin, dan Payment Gateway (33 use case, 12 tabel).
 Aturan emas: **jika desain Figma bertentangan dengan dokumen ini, ikuti dokumen ini** (lihat bagian 15).
 
 ## 1. Ringkasan
-Cendekia Muda adalah aplikasi web persiapan UTBK-SNBT untuk siswa SMA. Siswa mencoba soal dan materi preview gratis, lalu membeli program berbayar untuk membuka bank soal, tryout mingguan, dan (program tertentu) video pembahasan. Pembayaran diproses otomatis lewat payment gateway tanpa verifikasi manual. Admin mengelola konten, program, tryout, dan memantau transaksi serta laporan.
+Cendekia Muda adalah aplikasi web persiapan UTBK-SNBT untuk siswa SMA. Pengunjung dapat melihat informasi platform dan paket program di landing page, lalu mendaftar menjadi siswa. Siswa yang sudah login mencoba soal dan materi preview gratis, lalu membeli program berbayar untuk membuka bank soal, tryout mingguan, dan (program tertentu) video pembahasan. Pada rancangan layanan, pembayaran diproses otomatis lewat payment gateway tanpa verifikasi manual; prototype saat ini memakai simulasi callback lokal. Admin mengelola konten, program, tryout, dan memantau transaksi serta laporan.
 Bahasa antarmuka: Bahasa Indonesia. Mata uang: Rupiah. Tata letak mengikuti wireframe (grayscale, low-fidelity) dan desain UI di Figma, dengan pengecualian pada bagian 15.
 
 ## 2. Aktor
-- **Siswa:** registrasi, coba gratis, beli program, belajar, latihan soal, tryout, lihat nilai.
+- **Pengunjung:** pengguna tanpa sesi login, baik belum memiliki akun maupun sudah memiliki akun tetapi sedang logout. Melihat landing page, ringkasan paket/harga dan fitur publik, serta melakukan registrasi akun siswa. Pengunjung yang sudah memiliki akun dapat melanjutkan melalui formulir login sesuai role akunnya.
+- **Siswa:** pemilik akun dengan role `siswa`. Setelah login dapat mencoba soal dan materi gratis, membeli program, belajar, mengerjakan latihan/tryout sesuai hak akses, serta melihat nilai dan progress pribadi. Registrasi berhasil membuat akun siswa Gratis dan langsung membuka sesi siswa pada prototype.
 - **Admin:** kelola siswa, program, materi, bank soal, tryout, pantau transaksi, laporan. Akun admin dibuat langsung oleh pengelola, bukan lewat registrasi publik. Admin masuk lewat halaman **Login Admin** tersendiri.
-- **Payment Gateway (eksternal):** memproses pembayaran dan mengirim notifikasi status.
-- Proses otomatis sistem (bukan aktor): verifikasi pembayaran, aktivasi akses, pembatalan transaksi kedaluwarsa, penilaian tryout, penyimpanan jawaban latihan.
+- **Payment Gateway (sistem eksternal):** dalam rancangan layanan, memproses pembayaran dan mengirim notifikasi status ke Cendekia Muda. Tidak menggunakan akun/login portal. Interaksi ini masih disimulasikan dengan tombol uji pada prototype.
+- **Proses internal:** validasi notifikasi pembayaran, aktivasi akses, pembatalan transaksi kedaluwarsa, penilaian tryout, dan penyimpanan jawaban latihan dijalankan oleh aplikasi; proses ini bukan aktor eksternal tambahan.
+
+Rancangan ini membedakan **tiga aktor manusia** (Pengunjung, Siswa, Admin) dan **satu aktor sistem eksternal** (Payment Gateway). Role akun yang disimpan tetap **`siswa` dan `admin`**. Pengunjung tidak memiliki role atau tabel tersendiri; Gratis/Aktif merupakan status akses siswa.
+
+**Konfirmasi syarat tugas:** penerimaan Pengunjung sebagai aktor ketiga masih perlu dikonfirmasi kepada dosen, terutama apakah “minimal 3 aktor, dengan login” mengharuskan tiga role yang masing-masing login. Dokumen ini tidak menyatakan syarat tersebut sudah pasti terpenuhi. Rincian akses dan diagram ringkas tersedia di [Aktor dan Akses](docs/AKTOR-DAN-AKSES.md).
 
 ## 3. Konsep Akses
-- Status akses dihitung, tidak disimpan: **Gratis** jika tidak ada program yang sedang berjalan, **Aktif** jika ada pendaftaran Lunas yang masa aktifnya berjalan.
-- Konten bertanda gratis terbuka untuk semua siswa login. Bank soal berbayar, materi PDF, pembahasan lengkap, dan tryout terbuka untuk siswa Aktif. Video hanya jika program aktif punya akses video.
+- **Publik:** landing page (`#/landing`), bagian paket program pada landing (`#/landing#program`), registrasi, login siswa/admin, dan formulir pemulihan password dapat dibuka tanpa sesi login. Penggunaan tautan reset tetap memerlukan token yang valid.
+- **Siswa Login:** akses setelah autentikasi akun `siswa`, mencakup profil, program di portal, transaksi pribadi, soal/materi gratis, notifikasi, nilai, dan progress. Istilah “gratis” pada konten tidak berarti dapat diakses pengunjung tanpa login.
+- **Siswa Aktif:** siswa login dengan pendaftaran Lunas yang masa aktifnya berjalan; mendapat fitur berbayar sesuai program. Video berbayar memerlukan program dengan `akses_video`.
+- **Admin:** akses setelah autentikasi akun `admin`, melalui `#/auth/admin-login` menuju `#/admin/dashboard`. Halaman kelola memerlukan role admin; siswa tidak memperoleh akses admin dari status programnya.
+- Status akses siswa dihitung, tidak disimpan sebagai role: **Gratis** jika tidak ada program yang sedang berjalan, **Aktif** jika ada pendaftaran Lunas yang masa aktifnya berjalan.
+- Konten bertanda gratis terbuka untuk semua siswa login. Bank soal berbayar, materi PDF, pembahasan lengkap, dan tryout terbuka untuk siswa Aktif. Akses menu Video Pembahasan memerlukan program aktif dengan akses video.
 - **Pembahasan:** pada soal gratis, siswa Gratis hanya melihat **kunci jawaban (benar/salah)**. Pembahasan lengkap hanya untuk siswa Aktif.
 - Setelah masa aktif berakhir konten berbayar terkunci lagi, riwayat latihan dan nilai tetap tersimpan dan bisa dilihat.
 - Menu atau konten terkunci tampil dengan ikon gembok dan ajakan upgrade.
-- Akses konten berbayar harus dicek di sisi server/route guard, bukan hanya disembunyikan di UI.
+- Pengunjung yang membuka `#/siswa/...` diarahkan ke login siswa; akses `#/admin/...` tanpa role admin diarahkan ke login admin. Pemilik akun tetap harus menyelesaikan autentikasi sebelum memakai fitur portal.
+- Prototype memeriksa akses di router dan operasi data JavaScript. Implementasi backend harus memeriksa sesi, role, kepemilikan data, dan akses konten di server; proteksi browser saja belum memenuhi kebutuhan keamanan layanan produksi.
 
 ## 4. Program (nama dan harga contoh)
 | Program | Durasi | Harga | Bank soal, pembahasan teks, tryout mingguan | Video pembahasan |
@@ -57,28 +67,30 @@ Tujuh subtes UTBK-SNBT: Penalaran Umum, Pengetahuan dan Pemahaman Umum, Pemahama
 - Skor = jumlah benar / total soal x 100 (tanpa pengurangan salah, **bukan IRT**). Kategori capaian per subtes (contoh): Sangat Tinggi (85 ke atas), Tinggi (70-84), Baik (55-69), Moderat (40-54), Perlu Peningkatan (25-39), Kritis (di bawah 25).
 - **Review dan Pembahasan Tryout** terbuka untuk siswa Aktif pada tryout berstatus Selesai, diakses dari Hasil Tryout dan tabel riwayat Nilai dan Progress.
 
-## 8. Use Case (32)
-Gratis = semua siswa login. Berbayar = siswa Aktif. Sistem = otomatis.
+## 8. Use Case (33)
+**Publik** = tanpa sesi login. **Siswa Login** = akun siswa yang sudah login, termasuk status Gratis dan Aktif. **Siswa Aktif** = siswa login dengan program aktif. **Admin** = akun admin yang sudah login. **Otomatis** = proses internal aplikasi.
 
-| Kode | Use Case | Aktor | Akses |
+Formulir login/pemulihan bersifat publik; aktor Siswa atau Admin pada UC-02/UC-03 menunjukkan pemilik akun yang sedang mengakses formulir, bukan syarat sudah login. Label “Sistem internal” di tabel menjelaskan pemicu proses otomatis dan tidak menambah aktor eksternal.
+
+| Kode | Use Case | Aktor / pemicu | Akses |
 | --- | --- | --- | --- |
-| UC-01 | Registrasi | Siswa | Gratis |
-| UC-02 | Login (admin lewat Login Admin) | Siswa, Admin | Gratis |
-| UC-03 | Lupa Password | Siswa, Admin | Gratis |
-| UC-04 | Kelola Profil (termasuk asal sekolah, tahun lulus) | Siswa | Gratis |
-| UC-05 | Lihat Daftar Program | Siswa | Gratis |
-| UC-06 | Pilih Program | Siswa | Gratis |
-| UC-07 | Bayar Program | Siswa, Payment Gateway | Gratis |
-| UC-08 | Perpanjang atau Upgrade Program | Siswa | Berbayar |
-| UC-09 | Lihat Status dan Riwayat Transaksi | Siswa | Gratis |
-| UC-10 | Kerjakan Soal Gratis (Gratis hanya lihat kunci jawaban) | Siswa | Gratis |
-| UC-11 | Lihat Materi Preview | Siswa | Gratis |
-| UC-12 | Lihat Notifikasi | Siswa | Gratis |
-| UC-13 | Lihat Nilai dan Progress | Siswa | Gratis |
-| UC-14 | Akses Materi Lengkap (PDF dan bank soal) | Siswa | Berbayar |
-| UC-15 | Tonton Video Pembahasan | Siswa | Berbayar |
-| UC-16 | Kerjakan Tryout | Siswa | Berbayar |
-| UC-17 | Nilai Tryout Otomatis | Sistem | Berbayar |
+| UC-01 | Registrasi akun siswa | Pengunjung | Publik |
+| UC-02 | Login (admin lewat Login Admin) | Siswa, Admin | Publik; kredensial dan role diverifikasi |
+| UC-03 | Lupa Password | Siswa, Admin | Publik; reset memerlukan token valid |
+| UC-04 | Kelola Profil (termasuk asal sekolah, tahun lulus) | Siswa | Siswa Login |
+| UC-05 | Lihat Daftar Program | Pengunjung, Siswa | Publik untuk ringkasan di landing; Siswa Login untuk halaman program portal |
+| UC-06 | Pilih Program | Siswa | Siswa Login |
+| UC-07 | Bayar Program | Siswa, Payment Gateway | Siswa Login; interaksi gateway disimulasikan |
+| UC-08 | Perpanjang atau Upgrade Program | Siswa | Siswa Aktif; mengikuti aturan waktu/program |
+| UC-09 | Lihat Status dan Riwayat Transaksi | Siswa | Siswa Login; transaksi milik sendiri |
+| UC-10 | Kerjakan Soal Gratis (siswa Gratis hanya lihat kunci jawaban) | Siswa | Siswa Login |
+| UC-11 | Lihat Materi Preview | Siswa | Siswa Login |
+| UC-12 | Lihat Notifikasi | Siswa | Siswa Login; notifikasi milik sendiri |
+| UC-13 | Lihat Nilai dan Progress | Siswa | Siswa Login; hasil milik sendiri |
+| UC-14 | Akses Materi Lengkap (PDF dan bank soal) | Siswa | Siswa Aktif |
+| UC-15 | Tonton Video Pembahasan | Siswa | Siswa Aktif dengan akses video untuk konten berbayar |
+| UC-16 | Kerjakan Tryout | Siswa | Siswa Aktif |
+| UC-17 | Nilai Tryout Otomatis | Siswa mengumpulkan / sistem internal saat waktu habis | Otomatis pada pengerjaan tryout |
 | UC-18 | Lihat Laporan (termasuk ekspor CSV log transaksi) | Admin | Admin |
 | UC-19 | Kelola Siswa | Admin | Admin |
 | UC-20 | Kelola Program | Admin | Admin |
@@ -86,14 +98,17 @@ Gratis = semua siswa login. Berbayar = siswa Aktif. Sistem = otomatis.
 | UC-22 | Kelola Tryout dan Jadwal Rilis | Admin | Admin |
 | UC-23 | Tandai Konten Gratis/Berbayar | Admin | Admin |
 | UC-24 | Pantau Transaksi | Admin | Admin |
-| UC-25 | Verifikasi Pembayaran Otomatis | Payment Gateway, Sistem | Sistem |
-| UC-26 | Aktifkan Akses Siswa | Sistem | Sistem |
-| UC-27 | Batalkan Transaksi Kedaluwarsa (hanya Kedaluwarsa, bukan Gagal) | Sistem | Sistem |
-| UC-28 | Batalkan Pesanan | Siswa | Gratis |
-| UC-29 | Kerjakan Latihan Soal Lengkap (termasuk drilling 10 soal) | Siswa | Berbayar |
-| UC-30 | Simpan Jawaban Latihan | Sistem | Gratis dan Berbayar |
-| UC-31 | Lihat Review dan Pembahasan Tryout | Siswa | Berbayar |
-| UC-32 | Tandai Soal Ragu-Ragu | Siswa | Berbayar |
+| UC-25 | Verifikasi Pembayaran Otomatis | Payment Gateway mengirim status; sistem internal memvalidasi | Otomatis; callback simulasi pada prototype |
+| UC-26 | Aktifkan Akses Siswa | Sistem internal setelah pembayaran Lunas | Otomatis |
+| UC-27 | Batalkan Transaksi Kedaluwarsa (hanya Kedaluwarsa, bukan Gagal) | Sistem internal saat batas bayar terlewati / status gateway Kedaluwarsa | Otomatis |
+| UC-28 | Batalkan Pesanan | Siswa | Siswa Login; pesanan sendiri yang masih menunggu |
+| UC-29 | Kerjakan Latihan Soal Lengkap (termasuk drilling 10 soal) | Siswa | Siswa Aktif |
+| UC-30 | Simpan Jawaban Latihan | Sistem internal setelah siswa menjawab | Otomatis untuk siswa yang sudah login |
+| UC-31 | Lihat Review dan Pembahasan Tryout | Siswa | Siswa Aktif; tryout sendiri yang sudah selesai |
+| UC-32 | Tandai Soal Ragu-Ragu | Siswa | Siswa Aktif saat mengerjakan tryout |
+| UC-33 | Lihat Landing Page dan Informasi Publik | Pengunjung | Publik; pengenalan platform, subtes, keunggulan, contoh cerita siswa, dan bagian kontak |
+
+UC-01–UC-32 mempertahankan nomor sebelumnya. UC-33 mendokumentasikan landing page yang sudah tersedia; rincian paket di landing termasuk UC-05. Melihat informasi publik tidak otomatis membuat akun atau memberi akses ke materi/soal. Tombol Coba Gratis dan Pilih Program pada landing mengarahkan pengunjung ke registrasi; selesai registrasi, prototype membuka sesi siswa Gratis. Login menjadi prasyarat operasi portal, bukan prasyarat UC-01–UC-03 atau akses publik UC-05/UC-33.
 
 Relasi (asal -> tujuan; include = selalu dipanggil, extend = kondisional):
 - Bayar Program include Pilih Program
@@ -112,7 +127,11 @@ Relasi (asal -> tujuan; include = selalu dipanggil, extend = kondisional):
 ## 9. Daftar Layar (mengikuti wireframe dan UI Figma)
 **Landing Page:** navbar (Beranda, Program, Keunggulan, Testimoni, Kontak, Masuk, Daftar); hero dengan tombol Coba Gratis dan Lihat Program, plus mockup Portal Siswa; Keunggulan Utama (3 kartu); Alur Belajar (01 Daftar, 02 Program, 03 Simulasi); Paket Belajar (dua kartu program); Cerita Siswa (3 testimoni); banner "Daftar Akun Gratis Sekarang" dan "Konsultasi Program via WhatsApp"; footer (Navigasi, Program UTBK, Kontak & Lokasi).
 
+Landing merupakan halaman publik untuk Pengunjung. Kartu paket menampilkan harga dan fitur tanpa login; halaman `#/siswa/program` beserta tabel perbandingan dan FAQ merupakan bagian portal siswa. Tautan dari landing menuju halaman portal tetap mengikuti pemeriksaan login. Kontak WhatsApp bergantung pada konfigurasi kontak resmi; jika kosong, prototype menampilkan dialog bantuan.
+
 **Auth:** Login (layout terbagi, email, kata sandi dengan tampilkan, Ingat Saya, Lupa Kata Sandi, Masuk, tautan Daftar Akun Baru). Registrasi (nama lengkap, email, nomor HP, kata sandi min 8, konfirmasi, centang syarat, Daftar Sekarang). Lupa Kata Sandi (email dan kirim tautan). **Login Admin** (halaman tersendiri). Tanpa login pihak ketiga.
+
+Form autentikasi dapat dibuka tanpa sesi. Registrasi publik selalu menghasilkan akun `siswa`; admin tidak didaftarkan melalui formulir tersebut. Pemulihan password pada prototype menampilkan tautan reset lokal, belum mengirim email. Pengunjung yang berhasil login masuk sebagai Siswa atau Admin sesuai akun; setelah logout, akses kembali ke area publik.
 
 **Kerangka Siswa:** sidebar, top bar (pencarian, notifikasi dengan badge, nama dan status akses).
 - Siswa Gratis: Beranda, Latihan Soal Gratis, Materi Preview, Daftar Program, Pembayaran & Transaksi, Nilai & Progress, Notifikasi, Profil Saya; grup "Fitur Premium Terkunci" (gembok): Bank Soal Lengkap, Tryout, Video Pembahasan.
@@ -154,6 +173,8 @@ Responsif (HP dan komputer), halaman di bawah 3 detik, password di-hash, data ka
 Refund, voucher/kupon, diskon/harga coret, peringkat atau ranking antar siswa, skor IRT atau tryout adaptif, timer per subtes, live class, mentor, forum komunitas, transfer manual dengan upload bukti, pembayaran gerai ritel, aplikasi native, soal selain pilihan ganda, fitur tugas, langganan otomatis, login pihak ketiga.
 
 ## 12. Model Data (12 tabel)
+Pengunjung tidak disimpan sebagai entitas akun. Baris `users` baru dibuat saat registrasi siswa atau pembuatan akun oleh pengelola. Payment Gateway juga tidak membutuhkan baris pengguna; identitas/status transaksi dicatat di `pembayaran`. Pengelompokan aktor ini tidak menambah tabel atau role login.
+
 - **users:** id_user, nama, email, password (hash), no_hp, asal_sekolah (opsional), tahun_lulus (opsional), role (siswa/admin), is_aktif, created_at
 - **notifikasi:** id_notifikasi, id_user, judul, pesan, tipe, sudah_dibaca, created_at
 - **program:** id_program, nama_program, deskripsi, harga, durasi_hari, akses_video, status (Aktif/Nonaktif)
@@ -206,7 +227,7 @@ Beberapa elemen di desain Figma di luar cakupan. **Jangan diimplementasikan**; t
 
 ## 16. Instruksi untuk Builder (AI Agent)
 1. Baca seluruh dokumen ini sebelum menulis kode. Jika ada pertanyaan, ajukan sebelum membangun, jangan menebak.
-2. Bangun aplikasi web responsif dengan routing Landing, Auth, Siswa, dan Admin. Guard akses berdasarkan role dan program aktif; status akses dihitung dari `pendaftaran`, tidak disimpan di `users`.
+2. Bangun aplikasi web responsif dengan routing Landing dan Auth yang dapat dibuka publik, serta portal Siswa dan Admin yang memerlukan login. Pengunjung dapat melihat landing dan mendaftar, tetapi materi/soal gratis tetap memerlukan akun siswa. Guard akses berdasarkan role `siswa/admin` dan program aktif; status akses dihitung dari `pendaftaran`, tidak disimpan di `users`.
 3. Gunakan data mock sesuai model data 12 tabel dan simulasikan callback gateway dengan tombol uji (Berhasil, Gagal, Kedaluwarsa), termasuk validasi signature palsu dan idempotensi notifikasi ganda.
 4. Wujudkan alur end-to-end: registrasi, coba gratis (kunci jawaban saja), beli program, bayar atau batalkan pesanan, akses terbuka, latihan soal (setiap jawaban disimpan), tryout (sekali kerja, satu timer, autosave, tandai ragu-ragu), review pembahasan, nilai dan progress per subtes, perpanjangan H-3, akses terkunci setelah masa aktif habis.
 5. Jangan menambah fitur di luar bagian 11 dan 15. Jangan menambah tabel di luar 12 tabel tanpa persetujuan.
