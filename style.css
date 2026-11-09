@@ -1182,3 +1182,100 @@ table .badge { font-size: 9px; }
   .portal-footer > span { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+/* Revisi portal pengajar, pendamping, dan navigasi — 9 November 2026. */
+.auth-staff-links { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; font-size:13px; margin-top:18px; }
+.auth-staff-links a { color:var(--teal-dark,#167a6d); text-decoration:underline; text-underline-offset:3px; }
+.profile-popover { min-width:260px; max-width:calc(100vw - 30px); }
+.profile-popover .btn { justify-content:flex-start; white-space:normal; text-align:left; width:100%; }
+.sidebar nav { flex:1; min-height:0; overflow-y:auto; }
+.sidebar-bottom { flex-shrink:0; }
+.assignment-summary { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:26px 28px; margin-bottom:24px; background:#fff; border:1px solid #e6e9f0; border-radius:16px; }
+.assignment-summary h2 { margin:8px 0; }
+.assignment-summary p { margin:0; color:#5b6478; }
+.draft-list, .assignment-list { display:grid; }
+.draft-row, .assignment-row { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:20px 0; border-bottom:1px solid #e6e9f0; }
+.draft-row:first-child, .assignment-row:first-child { padding-top:4px; }
+.draft-row:last-child, .assignment-row:last-child { border-bottom:0; padding-bottom:4px; }
+.draft-row h3, .assignment-row strong { margin:0; font-size:16px; }
+.draft-row p, .assignment-row p { margin:6px 0 0; color:#5b6478; font-size:14px; }
+.management-table td { overflow-wrap:anywhere; }
+.management-table .chips { gap:5px; }
+.management-table .btn { white-space:normal; }
+.subject-checklist { margin:22px 0; padding:18px; border:1px solid #e6e9f0; border-radius:12px; }
+.subject-checklist legend { font-weight:600; padding:0 8px; }
+.subject-checklist p { font-size:13px; color:#5b6478; }
+.subject-checklist .checkbox { margin:13px 0; align-items:flex-start; }
+.mentor-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+.mentor-card { margin:0; display:flex; flex-direction:column; }
+.mentor-card h2 { font-size:19px; line-height:1.4; margin:10px 0 20px; }
+.mentor-person { display:flex; align-items:center; gap:12px; margin:auto 0 22px; }
+.mentor-person .avatar { flex-shrink:0; }
+.mentor-person small { display:block; margin-top:4px; color:#5b6478; }
+.tryout-management-bar { display:flex; align-items:center; justify-content:space-between; gap:18px; margin:0 0 24px; flex-wrap:wrap; }
+.tryout-subject-list { display:grid; gap:20px; }
+.tryout-subject { margin:0; }
+.tryout-subject .panel-heading { align-items:center; }
+.tryout-subject h2 { font-size:19px; margin-top:8px; }
+.tryout-question-list { margin:0; padding-left:24px; }
+.tryout-question-list li { padding:12px 4px; border-top:1px solid #e6e9f0; }
+.tryout-question-list .admin-question-link { font-size:14px; width:100%; }
+.tryout-subject > .text-link { margin-top:16px; }
+.question-picker-list { max-height:45vh; overflow:auto; margin:18px 0; border-block:1px solid #e6e9f0; }
+.pick-question { display:flex; align-items:center; gap:10px; padding:14px 0; border-bottom:1px solid #e6e9f0; }
+.pick-question:last-child { border:0; }
+.pick-question .checkbox { flex:1; align-items:flex-start; margin:0; line-height:1.5; }
+.pick-question small { display:block; color:#5b6478; margin-bottom:5px; }
+.pick-order { display:flex; flex-direction:column; gap:4px; }
+.pick-order button { width:32px; height:32px; border:1px solid #e6e9f0; }
+.staff-profile-form { max-width:620px; }
+.unpaid-list { max-width:760px; }
+.unpaid-card h2 { margin:24px 0 10px; }
+.unpaid-card .transaction-price { display:block; margin-bottom:18px; }
+.unpaid-card .transaction-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:22px; }
+.payment-tabs { margin-bottom:24px; }
+.summary-controls { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:18px; }
+.summary-subject-control, .summary-package-control { display:grid; gap:8px; font-size:13px; font-weight:600; min-width:240px; max-width:100%; }
+.summary-subject-control select, .summary-package-control select { width:100%; min-width:0; padding:12px; border:1px solid var(--border,#e6e9f0); border-radius:10px; background:white; color:var(--navy,#0f1b4d); font:inherit; }
+.summary-controls .tabs { margin:0; }
+.summary-scope { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted,#5b6478); margin-bottom:24px; }
+.summary-scope .icon { flex-shrink:0; width:17px; }
+.summary-method { color:var(--muted,#5b6478); font-size:13px; line-height:1.7; margin:0 0 25px; }
+.summary-table .admin-question-link { font-size:14px; line-height:1.5; }
+.summary-table .table-progress { min-width:150px; }
+.summary-table .table-progress strong { min-width:42px; }
+.summary-table td:first-child { width:58%; }
+.tryout-subject-links { margin-top:16px; gap:20px; }
+.external-video { border:0; aspect-ratio:16/9; width:100%; height:auto; min-height:240px; }
+.uploaded-media { min-height:140px; }
+.uploaded-media .lesson-video { width:100%; }
+.media-error { padding:20px; background:#fff5f5; color:#b42318; border-radius:12px; }
+[data-source-upload] .input-wrap input[type=file] { padding:12px; height:auto; font-size:13px; max-width:100%; }
+.pick-question[hidden], [data-source-link][hidden], [data-source-upload][hidden] { display:none; }
+@media (max-width:1100px) {
+  .mentor-grid { grid-template-columns:1fr; }
+  .management-table .table-scroll { overflow-x:auto; }
+}
+@media (max-width:640px) {
+  .summary-controls { align-items:stretch; }
+  .summary-subject-control, .summary-package-control { width:100%; min-width:0; }
+  .summary-controls .tabs { width:100%; flex-wrap:wrap; }
+  .summary-controls .tabs .btn { flex:1; }
+  .summary-table td:first-child { width:100%; }
+  .summary-table .table-progress { max-width:260px; }
+  .assignment-summary { display:block; padding:22px; }
+  .assignment-summary .btn { margin-top:18px; }
+  .draft-row, .assignment-row { align-items:flex-start; flex-direction:column; gap:12px; }
+  .management-table table, .management-table tbody, .management-table tr, .management-table td { display:block; width:100%; min-width:0; }
+  .management-table thead { display:none; }
+  .management-table tr { padding:14px 0; border-bottom:1px solid #e6e9f0; }
+  .management-table td { border:0; padding:7px 0; }
+  .management-table td::before { content:attr(data-label); display:block; color:#5b6478; font-size:12px; margin-bottom:3px; }
+  .management-table .table-scroll { overflow:visible; }
+  .tryout-subject .panel-heading { align-items:flex-start; flex-direction:column; gap:16px; }
+  .tryout-subject h2 { font-size:18px; }
+  .tryout-management-bar > .row { width:100%; }
+  .pick-question .checkbox { font-size:13px; }
+  .external-video { min-height:180px; }
+  .payment-tabs { flex-wrap:wrap; }
+}

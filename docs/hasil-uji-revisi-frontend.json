@@ -1,0 +1,118 @@
+{
+  "date": "2026-11-09",
+  "scope": "Frontend prototype lokal; bukan pengujian API PHP/PostgreSQL atau layanan produksi",
+  "unit": {
+    "command": "node --test tests/core.test.cjs tests/management.test.cjs",
+    "passed": 22,
+    "failed": 0
+  },
+  "browser": {
+    "passed": 20,
+    "failed": 0,
+    "viewports": [
+      1280,
+      390
+    ],
+    "checks": [
+      {
+        "name": "Public, student, teacher and admin routes at 1280px",
+        "pass": true
+      },
+      {
+        "name": "Public, student, teacher and admin routes at 390px",
+        "pass": true
+      },
+      {
+        "name": "Registration, free practice, reload, checkout, payment and upgrade",
+        "pass": true
+      },
+      {
+        "name": "Tryout autosave, resume, doubt flag, review and one-attempt restriction",
+        "pass": true
+      },
+      {
+        "name": "Actual PDF download and admin CSV export with read-only payment details",
+        "pass": true
+      },
+      {
+        "name": "Admin editing persists and preserves data history",
+        "pass": true
+      },
+      {
+        "name": "Drilling resumes at the next unanswered question and historical review adds no attempt",
+        "pass": true
+      },
+      {
+        "name": "Account recovery, profile edits and password change",
+        "pass": true
+      },
+      {
+        "name": "Admin creates question, material, student and scheduled tryout from the bank",
+        "pass": true
+      },
+      {
+        "name": "Admin subtest catalog, filters, previews and contextual forms",
+        "pass": true
+      },
+      {
+        "name": "Admin pagination survives editing, tab changes and filters in other subtests",
+        "pass": true
+      },
+      {
+        "name": "Admin mobile catalog and complete question preview fit the screen",
+        "pass": true
+      },
+      {
+        "name": "Mobile menu, notifications, skip link and automatic expiry refresh",
+        "pass": true
+      },
+      {
+        "name": "Teacher scoped catalog, content creation, immediate student access and forbidden subtest",
+        "pass": true
+      },
+      {
+        "name": "Admin assigns teacher multiple subtests, revokes access and saves staff profile",
+        "pass": true
+      },
+      {
+        "name": "Shared tryout collaboration by two teachers, read-only subtests and admin release",
+        "pass": true
+      },
+      {
+        "name": "Mentor contact CRUD, assignment history and active student WhatsApp access",
+        "pass": true
+      },
+      {
+        "name": "Video upload persists across reload, supports playback, and rejects invalid files",
+        "pass": true
+      },
+      {
+        "name": "Profile dropdown routes payments and password; notification dropdown remains accessible",
+        "pass": true
+      },
+      {
+        "name": "No unhandled browser errors",
+        "pass": true
+      }
+    ],
+    "unhandled_errors": []
+  },
+  "runs": [
+    {
+      "scope": "Full suite setelah koreksi skenario awal",
+      "passed": 19,
+      "failed": 1,
+      "note": "Satu skenario katalog gagal karena penantian tab/status; diperbaiki dalam harness."
+    },
+    {
+      "scope": "Ulang skenario Admin subtest catalog, filters, previews and contextual forms",
+      "passed": 1,
+      "failed": 0
+    }
+  ],
+  "limitations": [
+    "Data akun dan metadata tetap di localStorage; file unggahan di IndexedDB.",
+    "Tidak menguji server, PostgreSQL, sinkronisasi antar perangkat, gateway nyata, email, atau storage privat.",
+    "Video tautan diuji validasi/pembentukan URL pemutar; pemutaran penyedia eksternal bergantung jaringan dan izin embed."
+  ]
+}

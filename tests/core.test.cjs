@@ -12,13 +12,13 @@ function fixture() {
   const storage = () => { const map = new Map(); return { getItem: k => map.get(k) ?? null, setItem: (k, v) => map.set(k, String(v)), removeItem: k => map.delete(k) }; };
   const ctx = { crypto: webcrypto, TextEncoder, Date: Clock, localStorage: storage(), sessionStorage: storage(), btoa, atob, console };
   ctx.window = ctx; vm.createContext(ctx);
-  for (const file of ['js/data.js', 'js/core.js']) vm.runInContext(fs.readFileSync(path.join(__dirname, '..', file), 'utf8'), ctx, { filename: file });
+  for (const file of ['js/data.js', 'js/core.js', 'js/management.js']) vm.runInContext(fs.readFileSync(path.join(__dirname, '..', file), 'utf8'), ctx, { filename: file });
   const C = ctx.CM;
   return { C, ctx, advance: ms => { now += ms; }, user: (id = 'usr-siswa-002') => ctx.sessionStorage.setItem(C.config.sessionKey, id), clearPending: () => { C.db.pembayaran.filter(p => p.status === 'Menunggu Pembayaran').forEach(p => C.cancel(p.id_pembayaran)); } };
 }
 
-test('Seed uses twelve tables, seven subtests, consistent tryout scores and usable local videos', () => {
-  const { C } = fixture(); assert.equal(Object.keys(C.db).length, 12); assert.equal(C.subtests.length, 7);
+test('Seed uses sixteen tables, seven subtests, consistent tryout scores and usable local videos', () => {
+  const { C } = fixture(); assert.equal(Object.keys(C.db).length, 16); assert.equal(C.subtests.length, 7);
   for (const s of C.subtests) { assert.equal(C.db.soal.filter(q => q.subtes === s.name).length, 10); assert.ok(C.db.materi.find(m => m.subtes === s.name && m.tipe === 'video').url_file.endsWith(`${s.id}.webm`)); }
   for (const r of C.db.hasil_tryout) { const n = C.db.jawaban_siswa.filter(a => a.id_hasil === r.id_hasil && a.is_benar).length; assert.equal(r.jumlah_benar, n); assert.equal(r.skor, Number((n / C.testQuestions(r.id_tryout).length * 100).toFixed(1))); }
 });
@@ -31,7 +31,7 @@ test('Authentication checks role, hashes passwords, and rejects duplicate regist
 });
 test('Role and ownership guards reject unrelated payments, answers and results', () => {
   const { C, user } = fixture(); assert.equal(C.guard('/siswa/beranda'), '/auth/login'); user();
-  assert.equal(C.guard('/admin/dashboard'), '/auth/admin-login'); assert.equal(C.guard('/siswa/bank-soal'), '/siswa/program'); assert.throws(() => C.paymentForUser('pay-1')); assert.throws(() => C.result('hasil-001'));
+  assert.equal(C.guard('/admin/dashboard'), '/siswa/beranda'); assert.equal(C.guard('/siswa/bank-soal'), '/siswa/program'); assert.throws(() => C.paymentForUser('pay-1')); assert.throws(() => C.result('hasil-001'));
 });
 test('Practice stores every attempt while progress counts distinct active questions', () => {
   const { C, user } = fixture(); user(); const q = C.db.soal.find(q => q.is_gratis); C.practice(q.id_soal, q.jawaban_benar); C.practice(q.id_soal, 'B'); assert.equal(C.db.jawaban_latihan.filter(a => a.id_user === C.user().id_user).length, 2); assert.equal(C.progress(C.user().id_user, q.subtes).done, 1); assert.throws(() => C.practice('q-pu-10', 'A')); assert.throws(() => C.practice(q.id_soal, 'Z'));

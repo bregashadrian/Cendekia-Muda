@@ -1,111 +1,90 @@
 # Aktor dan Akses Cendekia Muda
 
-Pembaruan: **7 November 2026**. Acuan: [PRD](../PRD.md), implementasi halaman di [script.js](../script.js), aturan akses di [js/core.js](../js/core.js), dan [ERD](../ERD/ERD-Cendekia-Muda-revisi.drawio).
+Pembaruan: **9 November 2026**. Acuan target: [PRD](../assets/PRD.md) dan [ERD](../ERD/ERD-Cendekia-Muda-revisi.drawio). Dokumen ini menggantikan pembagian dua role pada 7 November. **Frontend tiga role sudah diterapkan** di [script.js](../script.js), [js/core.js](../js/core.js), dan [js/management.js](../js/management.js). Fondasi Node.js + Express sudah tersedia untuk frontend dan health endpoint; API bisnis, PostgreSQL, dan otorisasi server masih tahap berikutnya.
 
-## Aktor, akun, dan status akses
+## Aktor, akun, dan penugasan
 
-| Aktor | Kedudukan | Aktivitas utama | Role akun |
-| --- | --- | --- | --- |
-| Pengunjung | Pengguna tanpa sesi login; dapat belum punya akun atau sedang logout | Melihat informasi publik dan paket pada landing, melakukan registrasi | Tidak ada |
-| Siswa | Pemilik akun belajar | Login, belajar, membeli program, mengerjakan latihan/tryout, melihat hasil pribadi | `siswa` |
-| Admin | Pemilik akun pengelola | Login admin, mengelola siswa dan konten, memantau transaksi/laporan | `admin` |
-| Payment Gateway | Sistem eksternal dalam rancangan pembayaran | Memproses pembayaran dan mengirim status kepada aplikasi | Tidak ada; tidak memakai login portal |
-
-Dengan pembagian ini ada **tiga aktor manusia dan satu sistem eksternal**, tetapi hanya **dua role akun yang login**. Siswa Gratis dan Siswa Aktif merupakan status akses dari aktor Siswa yang sama. Aktif memerlukan pendaftaran Lunas yang sudah dimulai dan belum berakhir.
-
-Pengunjung tidak perlu akun demo atau tabel tersendiri. Registrasi membuat baris `users` dengan role `siswa`; prototype langsung membuka sesi siswa Gratis setelah registrasi berhasil. Logout menghapus sesi, sehingga pengguna kembali mengakses aplikasi sebagai pengunjung. Admin dibuat oleh pengelola; formulir registrasi publik tidak menawarkan pilihan role.
-
-**Syarat dosen belum terkonfirmasi:** pengunjung merupakan aktor dalam rancangan interaksi ini, tetapi belum ada kepastian bahwa dosen menerima pengunjung untuk syarat “minimal 3 aktor, dengan login”. Pertanyaan yang perlu diajukan: “Apakah Pengunjung tanpa login, Siswa dengan login, dan Admin dengan login memenuhi syarat, atau harus tiga role yang masing-masing login?”
-
-## Halaman yang dapat dibuka tanpa sesi
-
-| Halaman | Rute | Batas akses |
+| Pihak | Fungsi | Akun portal |
 | --- | --- | --- |
-| Landing | `#/landing` | Pengenalan platform, subtes, keunggulan, contoh cerita siswa, dan bagian kontak |
-| Paket di landing | `#/landing#program` | Ringkasan harga dan fitur paket; CTA Pilih Program untuk pengunjung menuju registrasi |
-| Registrasi | `#/auth/register` | Membuat akun siswa, bukan admin |
-| Login siswa | `#/auth/login` | Memeriksa akun dengan role siswa |
-| Login admin | `#/auth/admin-login` | Memeriksa akun dengan role admin; tautan juga tersedia di footer landing |
-| Pemulihan password | `#/auth/forgot-password` | Prototype menampilkan tautan pemulihan lokal untuk akun yang ditemukan |
-| Reset password | `#/auth/reset-password?token=...` | Form dapat dibuka tanpa sesi, tetapi perubahan password memerlukan token valid yang belum kedaluwarsa |
+| Pengunjung | Informasi publik dan registrasi siswa | Tidak ada |
+| Siswa | Belajar, transaksi, hasil, dan kontak pendamping pribadi | `siswa` |
+| Pengajar | Materi, video, bank soal, dan kontribusi draft tryout pada subtes tugasnya | `pengajar`, dibuat admin |
+| Admin | Seluruh pengelolaan, penugasan pengajar/pendamping, pemeriksaan dan rilis tryout | `admin`, dibuat pengelola |
+| Pendamping | Membimbing siswa melalui WhatsApp | Tidak ada; kontak dan penugasan dikelola admin |
+| Payment Gateway | Memproses pembayaran dan mengirim status | Sistem eksternal, bukan akun portal |
 
-Konten gratis tetap membutuhkan login siswa. Halaman program lengkap, tabel perbandingan, dan FAQ di `#/siswa/program` berada dalam portal siswa. Link menuju halaman tersebut dari area publik tetap mengarahkan pengunjung ke login. Tombol WhatsApp bergantung pada nomor resmi dalam konfigurasi; jika kosong, yang muncul adalah dialog bantuan.
+Ada **tiga role login**. Gratis/Aktif bukan role baru; keduanya status siswa yang dihitung dari pendaftaran. Pengajar dan pendamping berbeda fungsi. Seorang siswa dapat mempunyai beberapa pendamping untuk subtes berbeda; admin menentukan pembagiannya, siswa tidak memilih sendiri. Default satu penugasan pendamping aktif per siswa–subtes dijelaskan di PRD.
 
-## Matriks akses portal
+## Akses dan batas pengelolaan
 
-“Ya” berarti melalui halaman dan operasi aplikasi yang tersedia. Pembatasan saat ini dijalankan di browser sebagai prototype; implementasi backend nanti harus memeriksanya kembali di server.
-
-| Fitur | Pengunjung | Siswa Gratis | Siswa Aktif Reguler | Siswa Aktif Lengkap | Admin |
+| Fitur | Siswa Gratis | Aktif Reguler | Aktif Lengkap | Pengajar | Admin |
 | --- | --- | --- | --- | --- | --- |
-| Landing dan paket publik | Ya | Ya | Ya | Ya | Ya |
-| Profil, notifikasi, program, transaksi, dan progress siswa | Login dahulu | Milik sendiri | Milik sendiri | Milik sendiri | Tidak memakai portal siswa; kelola siswa/program dan pantau transaksi/laporan |
-| Latihan soal dan materi bertanda gratis | Login dahulu | Ya | Ya | Ya | Dikelola melalui area admin |
-| Pembahasan lengkap latihan | Login dahulu | Kunci/benar-salah saja | Ya | Ya | Pratinjau dan edit soal di area admin |
-| Bank soal lengkap dan PDF berbayar | Login dahulu | Perlu program aktif | Ya | Ya | Dikelola melalui area admin |
-| Menu Video Pembahasan (`#/siswa/video`) | Login dahulu | Terkunci | Terkunci | Ya | Dikelola melalui area admin |
-| Pengerjaan dan review tryout | Login dahulu | Perlu program aktif | Ya, sesuai jadwal dan status pengerjaan | Ya, sesuai jadwal dan status pengerjaan | Kelola jadwal/soal dan lihat laporan |
-| Halaman pengelolaan admin (`#/admin/...`) | Login admin dahulu | Tidak | Tidak | Tidak | Ya |
+| Profil dan kata sandi | Sendiri | Sendiri | Sendiri | Sendiri | Sendiri |
+| Program dan transaksi siswa | Sendiri | Sendiri | Sendiri | Tidak | Kelola program dan monitoring seluruh transaksi |
+| Konten bertanda gratis | Ya | Ya | Ya | Kelola subtes tugas | Kelola semua |
+| Pembahasan lengkap dan PDF berbayar | Terkunci | Ya | Ya | Kelola subtes tugas | Kelola semua |
+| Video berbayar | Terkunci | Terkunci | Ya | Kelola subtes tugas | Kelola semua |
+| Mengerjakan/review tryout | Terkunci | Sesuai jadwal, sekali pengerjaan | Sesuai jadwal, sekali pengerjaan | Tidak sebagai siswa | Tidak sebagai siswa |
+| Ringkasan latihan/tryout agregat per subtes | Tidak | Tidak | Tidak | Subtes tugas aktif, baca saja; tanpa identitas/nilai individu | Laporan admin yang sudah tersedia |
+| Draft tryout bersama | Tidak | Tidak | Tidak | Lihat tujuh subtes; ubah soal subtes tugas | Kelola semua |
+| Membuat paket, jadwal, durasi, rilis tryout | Tidak | Tidak | Tidak | Tidak | Ya |
+| Kontak Pendamping Saya | Terkunci | Penugasan sendiri | Penugasan sendiri | Tidak | Kelola kontak dan penugasan |
+| Akun pengajar dan tugas subtes | Tidak | Tidak | Tidak | Lihat tugas sendiri | Kelola semua |
 
-Perubahan akses program tidak menghapus riwayat latihan dan nilai. Setelah program berakhir, siswa tetap bisa login dan melihat hasil pribadi; konten berbayar dan review tryout kembali terkunci sesuai aturan PRD. Admin bukan akun siswa dengan paket yang lebih tinggi; akun admin mempunyai halaman pengelolaan tersendiri.
+Pengunjung hanya mengakses halaman publik. Konten gratis tetap membutuhkan login siswa. Menu video siswa mengikuti program dengan akses video; materi video yang secara eksplisit gratis dapat dipratinjau melalui materi gratis sesuai PRD. Program berakhir mengunci konten premium dan kontak pendamping, tetapi tidak menghapus hasil atau penugasan.
 
-## Diagram interaksi ringkas
+Pengajar dapat ditugaskan pada satu atau lebih subtes. Dalam subtes tugasnya, pengajar boleh mengelola konten bersama, termasuk karya pengajar lain. Simpan materi/video/bank soal langsung memublikasikan sesuai status aktif dan Gratis/Berbayar; tidak ada approval konten biasa. Pengajar tidak mendapat akses kontak siswa, transaksi, atau penugasan pendamping.
 
-Diagram berikut merangkum hubungan aktor dengan fungsi utama. Rincian 33 use case dan relasi include/extend tetap mengacu pada PRD.
+Pada layanan produksi, semua batas harus diperiksa di server, termasuk unduhan/stream file, perubahan subtes, URL langsung, dan payload yang dimanipulasi. Menyembunyikan tombol saja tidak cukup. Nama pembuat pada konten tidak menentukan izin; penugasan aktif yang menentukan.
+
+## Login dan navigasi
+
+| Area | Rute | Ketentuan |
+| --- | --- | --- |
+| Landing dan paket publik | `#/landing`, `#/landing#program` | Tanpa login |
+| Registrasi | `#/auth/register` | Selalu menghasilkan siswa |
+| Login siswa | `#/auth/login` | Kredensial siswa |
+| Login pengajar | `#/auth/pengajar-login` | Kredensial pengajar; menuju `#/pengajar/dashboard` |
+| Login admin | `#/auth/admin-login` | Kredensial admin; menuju `#/admin/dashboard` |
+| Pemulihan | `#/auth/forgot-password`, `#/auth/reset-password?token=...` | Token valid, sekali pakai; prototype belum mengirim email |
+| Program siswa | `#/siswa/program` | Tetap di sidebar, tidak dimasukkan ke dropdown profil |
+| Transaksi siswa | `#/siswa/transaksi` | Dropdown profil → Pembayaran & Transaksi; milik sendiri |
+| Pendamping Saya | `#/siswa/pendamping` | Rute baru; program aktif dan penugasan sendiri |
+
+Login pengajar tidak memerlukan landing baru. Registrasi publik tidak menyediakan pilihan admin/pengajar. Pengguna yang sudah login dengan role berbeda tidak dapat masuk ke portal lain dengan mengganti URL.
+
+Top bar siswa berisi ikon notifikasi dan avatar profil, **keduanya tetap membuka dropdown**. Notifikasi berisi pesan terbaru, status baca, dan Lihat Semua. Profil berisi Profil Saya/Ubah Profil, Pembayaran & Transaksi, Ubah Kata Sandi, Keluar; masing-masing aksi membuka tampilan yang sesuai. Ketiga item Profil, Notifikasi, dan Pembayaran dikeluarkan dari sidebar siswa. Pemilihan program dan checkout tetap halaman tersendiri.
+
+Halaman pembayaran memisahkan Belum Dibayar dan Riwayat Transaksi dengan aksi lanjut/batal/coba lagi sesuai status. Monitoring pembayaran admin tetap ada pada portal admin.
+
+Pengajar memiliki menu **Hasil Belajar** dengan ringkasan latihan dan tryout terpisah per subtes tugas aktif. Data bersifat agregat; bukan daftar nilai individu atau penugasan pengajar–siswa. Pengajar tidak dapat membuka ringkasan subtes lain atau mengubah nilai. Sumber data menggunakan tabel jawaban/hasil yang sudah ada; ERD tetap 16 tabel. Aturan perhitungan terdapat di PRD §7.2, dan hasil pemeriksaan di [audit ringkasan pengajar](AUDIT-RINGKASAN-PENGAJAR.md).
+
+## Alur tryout dan pendamping
 
 ```mermaid
 flowchart LR
-    Guest["Pengunjung tanpa sesi"]
-    Student["Siswa"]
-    Admin["Admin"]
-    Gateway["Payment Gateway eksternal"]
-
-    subgraph CM["Cendekia Muda"]
-        Public("Landing dan paket publik<br/>UC-33 dan UC-05")
-        Register("Registrasi siswa<br/>UC-01")
-        Auth("Login dan pemulihan password<br/>UC-02 dan UC-03")
-        Learn("Portal belajar, latihan,<br/>tryout dan hasil pribadi")
-        Purchase("Program dan transaksi siswa<br/>UC-06 sampai UC-09, UC-28")
-        Manage("Pengelolaan dan laporan admin<br/>UC-18 sampai UC-24")
-        Payment("Validasi status dan proses pembayaran internal<br/>UC-25 sampai UC-27")
-    end
-
-    Guest --- Public
-    Guest --- Register
-    Student --- Auth
-    Student --- Public
-    Student --- Learn
-    Student --- Purchase
-    Admin --- Auth
-    Admin --- Manage
-    Gateway --- Purchase
-    Gateway --- Payment
+    A[Admin] --> D[Draft tryout gabungan tujuh subtes]
+    G[Pengajar] --> S[Tambah atau pilih soal subtes tugas]
+    S --> D
+    D --> C[Admin periksa tujuh subtes dan rilis]
+    C --> T[Siswa aktif mengerjakan sekali dengan satu timer]
+    A --> P[Tetapkan pendamping siswa per subtes]
+    P --> V[Siswa aktif Reguler atau Lengkap melihat kontak sendiri]
+    V --> W[Konsultasi di WhatsApp]
 ```
 
-Proses penilaian, penyimpanan jawaban, validasi status pembayaran, dan aktivasi akses dijalankan di dalam aplikasi. Payment Gateway berada di luar batas sistem pada rancangan; pada prototype interaksinya digantikan tombol simulasi transaksi milik siswa. Admin memantau status pembayaran melalui laporan, tanpa verifikasi manual atau tombol simulasi di halaman monitoring.
+Semua pengajar mengisi paket bersama, bukan tryout terpisah per subtes. Di luar subtes tugasnya hanya baca. Status Rilis menutup perubahan pengajar, termasuk mengubah isi soal paket lewat bank soal; setelah ada pengerjaan, soal dan durasi dibekukan bagi semua pengelola. Konten soal yang sudah dipakai direvisi melalui soal baru agar hasil lama tidak berubah.
 
-## Penyesuaian use case
+Pembayaran lunas tidak otomatis menetapkan pendamping. Jika belum ditugaskan, tampilkan bantuan admin. Pendamping tidak login dan aplikasi tidak menyimpan percakapan WhatsApp.
 
-- **UC-01:** aktor registrasi diperjelas menjadi Pengunjung, dengan akses Publik. Hasilnya adalah akun siswa.
-- **UC-02 dan UC-03:** form login/pemulihan bersifat publik untuk pemilik akun siswa/admin yang belum login; operasi berikutnya tetap memerlukan kredensial atau token yang valid.
-- **UC-05:** Pengunjung melihat ringkasan paket di landing; Siswa mendapat halaman program dalam portal setelah login.
-- **UC-33:** mendokumentasikan landing page dan informasi publik yang sudah tersedia.
-- **UC-04 sampai UC-32:** nomor dipertahankan; label akses dan pemicu proses internal diperjelas. Semua rincian ada di tabel PRD, termasuk pembatasan konten berbayar dan kepemilikan data.
+## ERD dan cakupan revisi
 
-PRD sekarang memuat **33 use case**. Angka 32 pada arsip audit 3 November mengacu pada versi dokumen saat audit itu dilakukan, bukan jumlah terbaru.
+PRD target memuat **40 use case**, mempertahankan ID UC-01–UC-33 dan menambah UC-34–UC-40. ERD target memuat **16 tabel dan 27 foreign key**:
 
-## Kesesuaian ERD
+- Empat tabel baru: `subtes`, `pengajar_subtes`, `pendamping`, `siswa_pendamping`.
+- `users.role` mendapat pengajar. `materi` dan `soal` mengacu pada master subtes, serta menyimpan pembuat/pengubah dan waktu perubahan.
+- Materi menyimpan pilihan sumber tautan/unggahan dan metadata storage privat. Isi file tidak disimpan sebagai base64 di database.
+- Tryout menyimpan admin pembuat/perilis; `tryout_soal` menyimpan urutan. Aturan penugasan, unique gabungan, pembekuan, dan transaksi dijelaskan pada PRD §12.3.
+- Halaman pertama draw.io menampilkan seluruh 16 tabel; empat halaman detail memisahkan Akun dan Pendamping, Materi dan Bank Soal, Tryout dan Progress, serta Program dan Pembayaran. Kotak `[referensi]` bukan tabel tambahan.
 
-ERD tetap memuat **12 tabel dan 12 relasi antartabel** sesuai model data PRD.
-
-- Label kolom `users.role` diperjelas menjadi `role (siswa/admin)`.
-- Tidak ada tabel/role baru untuk pengunjung atau gateway. Gateway direpresentasikan melalui informasi transaksi di `pembayaran`.
-- Garis tambahan dari atribut `soal.pembahasan` ke `materi` dihapus karena tidak memiliki foreign key pendukung dan bertentangan dengan PRD yang menetapkan `materi` sebagai katalog bersama tanpa relasi langsung.
-- Tabel `jawaban_latihan`, `hasil_tryout`, dan `jawaban_siswa` tetap menyediakan rancangan penyimpanan progress/hasil per siswa.
-
-Perubahan diagram ini menyelaraskan dokumentasi dengan model yang sudah digunakan; data prototype dan struktur tabel tidak dimigrasikan. Pemeriksaan dilakukan dengan membandingkan entitas, atribut, dan pasangan relasi XML ERD terhadap PRD serta struktur data contoh.
-
-## Catatan pemeriksaan
-
-Dokumentasi diselaraskan berdasarkan pembacaan fungsi `landing`, `pricing`, `auth`, dan handler registrasi di `script.js`, serta `register`, `login`, `guard`, `materialAccess`, dan `enrollment` di `js/core.js`. Kode aplikasi, konfigurasi akun, dan hasil pengujian historis tidak diubah pada pekerjaan dokumentasi ini.
-
-Pemeriksaan konsistensi memastikan 33 nomor use case unik dan berurutan, 12 tabel serta 12 relasi ERD sesuai PRD, dan tautan lokal pada dokumentasi yang diperbarui valid. `git diff --check` lulus. Pengujian aplikasi tidak dijalankan ulang karena perubahan hanya pada dokumentasi dan diagram ERD.
+Frontend telah menerapkan alur di atas dengan 16 koleksi browser dan pemeriksaan akses pada router/operasi JavaScript. File unggahan berada di IndexedDB browser; akun, kontak, dan data lokal dapat diperiksa lewat DevTools sehingga belum merupakan proteksi produksi. Migrasi lokal mempertahankan ID dan riwayat lama. Fondasi Express belum menerapkan aturan akses bisnis ini. Koneksi PostgreSQL, migrasi SQL, autentikasi dan otorisasi API Express, file privat, serta pengujiannya tetap pekerjaan berikutnya. Lihat [panduan backend](../server/README.md) dan [audit revisi frontend](AUDIT-REVISI-FRONTEND.md); hasil pengujian historis sebelumnya tetap mengacu pada versi saat masing-masing audit dilakukan.
