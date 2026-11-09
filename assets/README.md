@@ -10,6 +10,8 @@ Prototype HTML, CSS, dan JavaScript berdasarkan [PRD](PRD.md) dan referensi desa
 
 Rincian target ada di [Aktor dan Akses](../docs/AKTOR-DAN-AKSES.md) dan [ERD](../ERD/ERD-Cendekia-Muda-revisi.drawio). ERD berisi satu halaman keseluruhan dan empat halaman detail; kotak referensi pada halaman detail bukan tabel tambahan.
 
+**Schema dan seed PostgreSQL sudah tersedia** di [cendekia_muda_database](../cendekia_muda_database/README.md): 16 tabel, 27 FK, tujuh subtes, serta dua program. Folder itu memuat panduan Navicat dan penyiapan laptop lain. SQL sudah diuji secara terisolasi; database aplikasi belum disambungkan ke Express.
+
 ## Menjalankan
 
 Buka terminal di **folder utama proyek** (induk folder `assets`, tempat `package.json` berada). Gunakan Node.js 24. Pada penyiapan pertama atau laptop baru:
@@ -67,6 +69,7 @@ Pengajar juga dapat membuka **Hasil Belajar**, memilih subtes tugasnya, lalu tab
 | `package.json` / `package-lock.json` | Perintah npm dan dependency Express yang dikunci versinya |
 | `.env.example` / `.nvmrc` | Contoh konfigurasi server dan versi Node.js |
 | `server/` | Fondasi Express, konfigurasi, route API, dan penanganan error |
+| `cendekia_muda_database/` | Schema PostgreSQL, seed, verifikasi, serta panduan Navicat dan integrasi |
 | `index.html` | Entry point, font, dan urutan pemuatan script |
 | `style.css` | UI kit, tampilan halaman, dan layout responsif |
 | `script.js` | Router, halaman, formulir, interaksi, PDF dan CSV |
@@ -76,7 +79,7 @@ Pengajar juga dapat membuka **Hasil Belajar**, memilih subtes tugasnya, lalu tab
 | `assets/` | Gambar dari referensi SVG dan tujuh video pengantar lokal |
 | `tests/` | Pengujian aturan inti dan alur browser |
 | `docs/AKTOR-DAN-AKSES.md` | Aktor, role, matriks akses, diagram interaksi, serta pemeriksaan kesesuaian ERD |
-| `ERD/ERD-Cendekia-Muda-revisi.drawio` | Rancangan target 16 tabel, tiga role, dan 27 foreign key; belum menjadi migrasi SQL |
+| `ERD/ERD-Cendekia-Muda-revisi.drawio` | Model 16 tabel, tiga role, dan 27 foreign key yang menjadi acuan schema SQL |
 | `docs/preview/` | Screenshot implementasi desktop dan HP |
 
 Isi `CM.config.whatsapp`, `email`, dan `address` di `js/data.js` dengan kontak resmi. WhatsApp memakai format kode negara, misalnya `62...`. Kontak kosong tidak diarahkan ke nomor contoh. Nomor dan alamat belum ditentukan dalam PRD.
@@ -92,19 +95,21 @@ Isi `CM.config.whatsapp`, `email`, dan `address` di `js/data.js` dengan kontak r
 
 ## Pengujian
 
-Aturan frontend dan server (Node.js 24, setelah `npm ci`):
+Aturan frontend, server, dan schema database (Node.js 24, setelah `npm ci`):
 
 ```sh
 npm test
 ```
 
-Gunakan `npm run test:server` untuk backend saja atau `npm run test:frontend` untuk aturan frontend. Pengujian browser opsional membutuhkan Playwright dengan Chromium tersedia secara terpisah:
+Gunakan `npm run test:server` untuk HTTP server, `npm run test:frontend` untuk aturan frontend, atau `npm run test:database` untuk SQL. Pengujian database memakai PGlite in-memory dari dev dependency dan tidak mengakses database pribadi. Pengujian browser opsional membutuhkan Playwright dengan Chromium tersedia secara terpisah:
 
 ```sh
 npm run test:browser
 ```
 
 Pemeriksaan fondasi server: **31 pengujian otomatis** dan **8 kelompok pemeriksaan browser melalui Express** lolos; lihat [audit backend](../docs/AUDIT-BACKEND-FOUNDATION.md).
+
+Revisi database menambah lima kelompok pengujian otomatis, termasuk 51 pemeriksaan constraint SQL. Rincian hasil dan batas uji ada di [audit database](../docs/AUDIT-DATABASE.md).
 
 Jika Playwright dipasang di lokasi lain, tentukan `PLAYWRIGHT_MODULE`. Gunakan `PLAYWRIGHT_BROWSERS_PATH` untuk lokasi browser dan `QA_OUTPUT` untuk folder hasil. Pengujian membuat server localhost sementara dan memakai profil browser terisolasi. Data browser pribadi tidak diubah. Video contoh dibuat ulang hanya jika file lokalnya belum ada.
 
@@ -116,4 +121,4 @@ Penyelarasan dokumentasi aktor pada **7 November 2026** digantikan oleh rancanga
 
 ## Pekerjaan berikutnya
 
-Fondasi Express sudah tersedia. Berikutnya hubungkan PostgreSQL, tentukan ORM (Prisma telah dibahas tetapi belum dipasang), buat migrasi sesuai ERD, lalu implementasikan autentikasi dan CRUD server. Sambungkan frontend ke API secara bertahap dan ganti simulasi pembayaran/email serta file lokal dengan layanan server. Sidebar ringkas yang dibuka melalui logo serta perombakan gaya visual dibahas terpisah dan belum dikerjakan pada revisi ini.
+Fondasi Express serta schema/seed PostgreSQL tersedia. Berikutnya siapkan database baru memakai SQL tersebut, hubungkan Express ke PostgreSQL, tentukan ORM (Prisma telah dibahas tetapi belum dipasang) dan riwayat migrasi, lalu implementasikan autentikasi dan CRUD server. Sambungkan frontend ke API secara bertahap dan ganti simulasi pembayaran/email serta file lokal dengan layanan server. Sidebar ringkas yang dibuka melalui logo serta perombakan gaya visual dibahas terpisah dan belum dikerjakan pada revisi ini.

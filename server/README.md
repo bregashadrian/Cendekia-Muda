@@ -2,6 +2,8 @@
 
 Node.js 24 + Express 5 melayani frontend yang sudah ada dan endpoint pengecekan server. Tahap ini belum menghubungkan PostgreSQL, Prisma, login, atau CRUD ke backend. Akun demo, jawaban, transaksi, dan unggahan masih memakai penyimpanan browser.
 
+Schema PostgreSQL 16 tabel dan seed tujuh subtes/dua program kini tersedia di [folder database](../cendekia_muda_database/README.md). Panduan tersebut mencakup Navicat dan laptop lain. SQL sudah diuji secara terisolasi; menjalankan `npm start` belum membuat atau menghubungkan database aplikasi.
+
 ## Menjalankan
 
 Jalankan dari **folder utama Cendekia Muda**, tempat `package.json` berada:
@@ -59,16 +61,17 @@ Permintaan JSON dibatasi 100 KB. Batas ini bukan mekanisme unggah file; upload b
 ```sh
 npm test
 npm run test:server
+npm run test:database
 ```
 
-`npm test` menjalankan aturan frontend dan pengujian server. Pengujian HTTP memakai port sementara dan menutup server setelah selesai, tanpa mengubah penyimpanan browser pribadi. Panduan pengujian browser lengkap tersedia di [README proyek](../assets/README.md).
+`npm test` menjalankan aturan frontend, pengujian HTTP server, dan schema database. Pengujian HTTP memakai port sementara dan menutup server setelah selesai; pengujian SQL memakai PGlite in-memory tanpa membaca koneksi database aplikasi. Penyimpanan browser pribadi tidak diubah. Panduan pengujian browser lengkap tersedia di [README proyek](../assets/README.md).
 
 Hasil pemeriksaan 9 November 2026: **31 pengujian otomatis** serta **8 kelompok pemeriksaan browser melalui Express** pada desktop/HP lolos. Rincian dan batas pemeriksaan tersedia di [audit fondasi backend](../docs/AUDIT-BACKEND-FOUNDATION.md).
 
 ## Langkah berikutnya
 
 1. Hubungkan PostgreSQL dan pilih ORM; Prisma telah dibahas, tetapi belum dipasang. Navicat tetap dapat dipakai untuk mengelola PostgreSQL.
-2. Buat migrasi berdasarkan 16 tabel ERD serta seed yang sesuai; jangan langsung menyalin penyimpanan demo sebagai data produksi.
+2. Terapkan schema/seed yang sudah tersedia pada database baru. Jika memakai Prisma setelah SQL dijalankan, siapkan introspeksi dan baseline migrasi. Database versi lama memerlukan migrasi khusus; panduan ada di folder database.
 3. Terapkan autentikasi, hashing password, sesi, dan otorisasi tiga role di server.
 4. Buat API akun, konten, tryout, dan ringkasan belajar; sambungkan frontend secara bertahap.
 5. Tambahkan storage privat, integrasi pembayaran/email, dan deployment setelah alur server diuji.

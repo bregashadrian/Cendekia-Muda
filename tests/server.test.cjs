@@ -57,7 +57,7 @@ test('Existing frontend and video byte ranges are served by Express', async () =
 });
 
 test('Config, source, documentation, dependencies and traversal paths are not public', async () => {
-  for (const url of ['/.env', '/.env.example', '/.git/config', '/package.json', '/package-lock.json', '/server/src/server.js', '/tests/server.test.cjs', '/node_modules/express/package.json', '/assets/PRD.md', '/assets/README.md', '/js/..%2fserver/src/app.js', '/assets/..%2f.env', '/script.js/']) {
+  for (const url of ['/.env', '/.env.example', '/.git/config', '/package.json', '/package-lock.json', '/server/src/server.js', '/tests/server.test.cjs', '/node_modules/express/package.json', '/assets/PRD.md', '/assets/README.md', '/js/..%2fserver/src/app.js', '/assets/..%2f.env', '/script.js/', '/cendekia_muda_database/01_schema.sql', '/tests/database.sql']) {
     const response = await fetch(base + url);
     assert.ok([403, 404].includes(response.status), `${url}: ${response.status}`);
     const body = await response.json();

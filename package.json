@@ -10,12 +10,16 @@
   "scripts": {
     "dev": "node --watch server/src/server.js",
     "start": "node server/src/server.js",
-    "test": "node --test tests/core.test.cjs tests/management.test.cjs tests/server.test.cjs",
+    "test": "node --test tests/core.test.cjs tests/management.test.cjs tests/server.test.cjs tests/database.test.cjs",
+    "test:database": "node --test tests/database.test.cjs",
     "test:server": "node --test tests/server.test.cjs",
     "test:frontend": "node --test tests/core.test.cjs tests/management.test.cjs",
     "test:browser": "node tests/browser.cjs"
   },
   "dependencies": {
     "express": "5.3.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.15"
   }
 }
